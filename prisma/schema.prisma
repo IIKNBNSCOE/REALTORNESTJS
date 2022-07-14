@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Home{
+  id          Int   @id   @default(autoincrement())
+  address     String
+  no_of_bed   Int
+  no_of_bath  Float
+  city        String
+  listed_date  DateTime    @default(now())    
+  price        Float
+  land_size    Float
+  property_type PropertyType
+  images       Image[]
+  realtor_id   Int
+  realtor      User   @relation(fields: [realtor_id],references: [id])
+  messages     Message[]
+}
+
+model Image{
+  id       Int    @id @default(autoincrement())
+  url      String
+  homeid   Int   
+  home     Home  @relation(fields: [homeid],references: [id])
+}
+
+model User{
+  id       Int  @id  @default(autoincrement())
+  name     String
+  phone    String
+  password  String
+  email     String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  type      UserType
+  homes     Home[]
+  buyer_message   Message[] @relation("buyer_messages")
+  realtor_message   Message[] @relation("realtor_messages")
+}
+
+model Message{
+  id         Int    @id  @default(autoincrement())
+  message    String
+  home_id    Int
+  home       Home   @relation(fields: [home_id],references: [id])
+  realtor_id  Int
+  realtor    User   @relation("realtor_messages",fields: [realtor_id],references: [id]) 
+  buyer_id  Int
+  buyer    User   @relation("buyer_messages",fields: [buyer_id],references: [id]) 
+}
+enum PropertyType{
+  RESIDENTIAL
+  COMMERCIAL
+}
+
+enum UserType{
+  BUYER
+  REALTOR
+  ADMIN
+}
